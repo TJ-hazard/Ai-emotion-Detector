@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Emotion Detection App</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h2>Upload or Capture Image for Emotion Detection</h2>
+      <form
+        id="upload-form"
+        action="/predict"
+        method="post"
+        enctype="multipart/form-data">
+        <label class="input-label"
+          >Select image:
+          <input type="file" name="file" accept="image/*" id="file-input" />
+        </label>
+        <input type="submit" value="Predict with Uploaded Image" class="btn" />
+      </form>
+      <hr />
+      <h3>Or capture live photo:</h3>
+      <video id="video" width="320" height="240" autoplay></video><br />
+      <button id="capture-btn" type="button" class="btn">Capture</button>
+      <form id="webcam-form" action="/predict" method="post">
+        <input type="hidden" name="webcam_image" id="webcam-img-input" />
+        <canvas
+          id="canvas"
+          width="320"
+          height="240"
+          style="display: none"></canvas>
+        <input type="submit" value="Predict with Captured Image" class="btn" />
+      </form>
+      {% if prediction %}
+      <div class="result">
+        <h3>Predicted Emotion: {{ prediction }}</h3>
+      </div>
+      {% endif %}
+    </div>
+    <script>
+      // Webcam setup
+      const video = document.getElementById("video");
+      const canvas = document.getElementById("canvas");
+      const captureBtn = document.getElementById("capture-btn");
+      const webcamImgInput = document.getElementById("webcam-img-input");
+      navigator.mediaDevices
+        .getUserMedia({video: true})
+        .then((stream) => {
+          video.srcObject = stream;
+        })
+        .catch((err) => {
+          alert("Unable to access webcam: " + err);
+        });
+      captureBtn.addEventListener("click", function () {
+        const context = canvas.getContext("2d");
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const dataURL = canvas.toDataURL("image/png");
+        webcamImgInput.value = dataURL;
+      });
+    </script>
+  </body>
+</html>
